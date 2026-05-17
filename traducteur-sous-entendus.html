@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Décodeur de messages</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f2ee;
+      --surface: #ffffff;
+      --border: #e2ddd8;
+      --text: #1a1714;
+      --muted: #8a8179;
+      --accent: #c8402a;
+      --accent-light: #fdf0ed;
+      --radius: 16px;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 48px 20px 80px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 48px;
+      animation: fadeUp 0.6s ease both;
+    }
+
+    header .eyebrow {
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 500;
+      margin-bottom: 12px;
+    }
+
+    header h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      line-height: 1.15;
+      color: var(--text);
+    }
+
+    header h1 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    header p {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 15px;
+      font-weight: 300;
+      max-width: 380px;
+      margin-inline: auto;
+      line-height: 1.6;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px;
+      width: 100%;
+      max-width: 620px;
+      animation: fadeUp 0.6s ease 0.1s both;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.04);
+    }
+
+    .context-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      padding: 7px 16px;
+      border-radius: 99px;
+      border: 1.5px solid var(--border);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      background: transparent;
+      color: var(--muted);
+      transition: all 0.18s ease;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .chip:hover { border-color: var(--accent); color: var(--accent); }
+    .chip.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 130px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      color: var(--text);
+      background: var(--bg);
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.2s;
+      line-height: 1.6;
+    }
+
+    textarea:focus { border-color: var(--accent); }
+    textarea::placeholder { color: #bbb; }
+
+    .btn {
+      margin-top: 20px;
+      width: 100%;
+      padding: 15px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn:hover:not(:disabled) {
+      background: #a8321f;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(200,64,42,0.3);
+    }
+
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    /* Results */
+    .result-card {
+      width: 100%;
+      max-width: 620px;
+      margin-top: 24px;
+      animation: fadeUp 0.5s ease both;
+    }
+
+    .result-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      margin-bottom: 14px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+    }
+
+    .result-section .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 99px;
+      margin-bottom: 14px;
+    }
+
+    .tag.red { background: var(--accent-light); color: var(--accent); }
+    .tag.blue { background: #edf2ff; color: #3455d1; }
+    .tag.green { background: #edfaf3; color: #1a7a4a; }
+    .tag.orange { background: #fff7ed; color: #c2610a; }
+
+    .result-section p {
+      font-size: 16px;
+      line-height: 1.65;
+      color: var(--text);
+    }
+
+    .result-section .sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 8px;
+      line-height: 1.5;
+    }
+
+    /* Tone meter */
+    .tone-bar {
+      display: flex;
+      gap: 4px;
+      margin-top: 12px;
+    }
+
+    .tone-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--border);
+      transition: background 0.3s ease;
+    }
+
+    .tone-dot.active { background: var(--accent); }
+
+    /* Loading */
+    .loading {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 14px;
+      padding: 20px 0;
+      justify-content: center;
+    }
+
+    .dot-pulse {
+      display: flex;
+      gap: 5px;
+    }
+
+    .dot-pulse span {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 1.2s ease-in-out infinite;
+    }
+
+    .dot-pulse span:nth-child(2) { animation-delay: 0.2s; }
+    .dot-pulse span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes pulse {
+      0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 16px 0;
+    }
+
+    .original-bubble {
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 20px;
+      border-left: 3px solid var(--border);
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">Analyse de message</div>
+  <h1>Ce qu'ils voulaient<br/><em>vraiment</em> dire</h1>
+  <p>Colle un message reçu. On te dit ce qui se cache vraiment derrière les mots.</p>
+</header>
+
+<div class="card">
+  <label>Contexte de la relation</label>
+  <div class="context-row" id="contextChips">
+    <button class="chip active" data-ctx="ami">👥 Ami·e</button>
+    <button class="chip" data-ctx="amoureux">💌 Amoureux·se</button>
+    <button class="chip" data-ctx="famille">👨‍👩‍👧 Famille</button>
+    <button class="chip" data-ctx="collègue">💼 Collègue</button>
+    <button class="chip" data-ctx="inconnu">🤷 Inconnu·e</button>
+  </div>
+
+  <label style="margin-top: 8px;">Le message reçu</label>
+  <textarea id="msgInput" placeholder="Ex : « C'est bon, fais comme tu veux. »&#10;Ex : « Ok, pas de problème. »&#10;Ex : « T'inquiète, j'ai compris. »"></textarea>
+
+  <button class="btn" id="analyzeBtn" onclick="analyze()">
+    <span>🔍</span> Décoder ce message
+  </button>
+</div>
+
+<div id="resultArea"></div>
+
+<script>
+  let selectedCtx = "ami";
+
+  document.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      selectedCtx = chip.dataset.ctx;
+    });
+  });
+
+  async function analyze() {
+    const msg = document.getElementById('msgInput').value.trim();
+    if (!msg) return;
+
+    const btn = document.getElementById('analyzeBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="dot-pulse"><span></span><span></span><span></span></span> Analyse en cours…';
+
+    document.getElementById('resultArea').innerHTML = `
+      <div class="result-card">
+        <div class="loading">
+          <div class="dot-pulse"><span></span><span></span><span></span></div>
+          Lecture entre les lignes…
+        </div>
+      </div>
+    `;
+
+    const prompt = `Tu es un expert en communication et psychologie des relations. Analyse ce message reçu dans le contexte d'une relation "${selectedCtx}".
+
+Message : "${msg}"
+
+Réponds UNIQUEMENT en JSON valide, sans balises markdown, sans explication, avec exactement cette structure :
+{
+  "vrai_sens": "Ce que la personne voulait vraiment dire en 1-2 phrases directes et honnêtes",
+  "emotion_cachee": "L'émotion principale que la personne ressent probablement",
+  "sous_entendu": "Le message implicite non-dit, formulé franchement",
+  "quoi_faire": "Un conseil concret sur comment réagir ou répondre",
+  "tension": 3
+}
+
+La valeur "tension" est un entier de 1 (neutre) à 5 (très tendu/conflictuel).
+Sois direct, honnête, parfois un peu cash. Pas de langue de bois.`;
+
+    try {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 1000,
+          messages: [{ role: "user", content: prompt }]
+        })
+      });
+
+      const data = await res.json();
+      const raw = data.content.map(i => i.text || "").join("");
+      const clean = raw.replace(/```json|```/g, "").trim();
+      const parsed = JSON.parse(clean);
+
+      renderResult(msg, parsed);
+    } catch (err) {
+      document.getElementById('resultArea').innerHTML = `
+        <div class="result-card">
+          <div class="result-section">
+            <p style="color:var(--accent)">Une erreur s'est produite. Réessaie !</p>
+          </div>
+        </div>`;
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = '<span>🔍</span> Décoder ce message';
+  }
+
+  function renderResult(original, d) {
+    const dots = Array.from({length: 5}, (_, i) =>
+      `<div class="tone-dot ${i < d.tension ? 'active' : ''}"></div>`
+    ).join('');
+
+    document.getElementById('resultArea').innerHTML = `
+      <div class="result-card">
+
+        <div class="result-section">
+          <div class="original-bubble">"${original}"</div>
+
+          <div class="tag red">💬 Ce qu'il/elle voulait vraiment dire</div>
+          <p>${d.vrai_sens}</p>
+        </div>
+
+        <div class="result-section">
+          <div class="tag orange">🎭 Émotion cachée</div>
+          <p>${d.emotion_cachee}</p>
+          <div class="divider"></div>
+          <div class="tag blue">🔍 Sous-entendu</div>
+          <p>${d.sous_entendu}</p>
+        </div>
+
+        <div class="result-section">
+          <div class="tag green">✅ Quoi faire</div>
+          <p>${d.quoi_faire}</p>
+          <div class="divider"></div>
+          <div style="font-size:12px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Niveau de tension</div>
+          <div class="tone-bar">${dots}</div>
+          <div class="sub">${getTensionLabel(d.tension)}</div>
+        </div>
+
+      </div>
+    `;
+  }
+
+  function getTensionLabel(n) {
+    const labels = ["", "Tout va bien, pas de drama 👌", "Légèrement tendu, à surveiller 👀", "Clairement mal à l'aise 😬", "Situation tendue, attention ⚠️", "C'est chaud, agis vite 🔥"];
+    return labels[n] || "";
+  }
+</script>
+
+</body>
+</html>
