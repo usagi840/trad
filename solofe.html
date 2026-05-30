@@ -62,6 +62,55 @@
       stroke-linecap: round;
       stroke-linejoin: round;
     }
+
+    #mobile-controls {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 180px;
+  pointer-events: none;
+  z-index: 500;
+}
+#joystick-zone {
+  position: absolute;
+  left: 0; top: 0;
+  width: 50%; height: 100%;
+  pointer-events: all;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+}
+.joy-btn {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  border: 2.5px solid rgba(255,255,255,0.35);
+  display: flex; align-items: center; justify-content: center;
+  touch-action: none;
+}
+.joy-btn.pressed { background: rgba(255,255,255,0.35); }
+.joy-btn svg { width: 36px; height: 36px; fill: rgba(255,255,255,0.8); }
+#jump-zone {
+  position: absolute;
+  right: 0; top: 0;
+  width: 50%; height: 100%;
+  pointer-events: all;
+  display: flex; align-items: center; justify-content: center;
+}
+#jump-btn {
+  width: 90px; height: 90px;
+  border-radius: 50%;
+  background: rgba(255,200,80,0.18);
+  border: 2.5px solid rgba(255,200,80,0.5);
+  font-size: 36px;
+  display: flex; align-items: center; justify-content: center;
+  touch-action: none;
+}
+#jump-btn.pressed { background: rgba(255,200,80,0.4); }
+@media (pointer: coarse) {
+  #mobile-controls { display: block; }
+}
   </style>
 </head>
 <body>
@@ -83,6 +132,23 @@
       <line x1="21" y1="3" x2="14" y2="10"/>
     </svg>
   </button>
+
+  <div id="mobile-controls">
+  <div id="joystick-zone">
+    <div class="joy-btn" id="btn-left"
+      ontouchstart="mLeft(true)" ontouchend="mLeft(false)" ontouchcancel="mLeft(false)">
+      <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+    </div>
+    <div class="joy-btn" id="btn-right"
+      ontouchstart="mRight(true)" ontouchend="mRight(false)" ontouchcancel="mRight(false)">
+      <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+    </div>
+  </div>
+  <div id="jump-zone">
+    <div id="jump-btn"
+      ontouchstart="mJump(true)" ontouchend="mJump(false)" ontouchcancel="mJump(false)">⬆</div>
+  </div>
+  </div>
 
   <div id="game-wrapper"></div>
 
@@ -171,6 +237,12 @@
   setTimeout(resizeCanvas, 300);
   window.addEventListener('resize', resizeCanvas);
 
+  var mobileKeys = { left: false, right: false, up: false };
+
+function mLeft(v)  { mobileKeys.left = v;  document.getElementById('btn-left').classList.toggle('pressed', v); }
+function mRight(v) { mobileKeys.right = v; document.getElementById('btn-right').classList.toggle('pressed', v); }
+function mJump(v)  { mobileKeys.up = v;    document.getElementById('jump-btn').classList.toggle('pressed', v); }
+
   function preload(){
     this.load.image('sky','assets/sky.png');
     this.load.image('ground','assets/platform.png');
@@ -212,13 +284,18 @@
     this.physics.add.collider(player, bombs, hitBomb, null, this);
   }
 
-  function update(){
-    if(gameOver) return;
-    if(cursors.left.isDown){ player.setVelocityX(-160); player.anims.play('left',true);}
-    else if(cursors.right.isDown){ player.setVelocityX(160); player.anims.play('right',true);}
-    else { player.setVelocityX(0); player.anims.play('turn'); }
-    if(cursors.up.isDown && player.body.touching.down) player.setVelocityY(-330);
-  }
+function update(){
+  if(gameOver) return;
+  var goLeft  = cursors.left.isDown  || mobileKeys.left;
+  var goRight = cursors.right.isDown || mobileKeys.right;
+  var goUp    = cursors.up.isDown    || mobileKeys.up;
+
+  if(goLeft)       { player.setVelocityX(-160); player.anims.play('left', true); }
+  else if(goRight) { player.setVelocityX(160);  player.anims.play('right', true); }
+  else             { player.setVelocityX(0);     player.anims.play('turn'); }
+
+  if(goUp && player.body.touching.down) player.setVelocityY(-330);
+}
 
   function collectStar(player, star){
     star.disableBody(true,true);
