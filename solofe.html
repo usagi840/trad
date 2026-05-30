@@ -98,19 +98,25 @@
   pointer-events: all;
   display: flex; align-items: center; justify-content: center;
 }
-#jump-btn {
-  width: 90px; height: 90px;
-  border-radius: 50%;
-  background: rgba(255,200,80,0.18);
-  border: 2.5px solid rgba(255,200,80,0.5);
-  font-size: 36px;
-  display: flex; align-items: center; justify-content: center;
-  touch-action: none;
+    
+#jump-zone {
+  position: absolute;
+  right: 0; top: 0;
+  width: 50%; height: 100%;
+  pointer-events: all;
 }
-#jump-btn.pressed { background: rgba(255,200,80,0.4); }
-@media (pointer: coarse) {
-  #mobile-controls { display: block; }
-}
+
+    #joystick-zone {
+  position: absolute;
+  left: 0; top: 0;
+  width: 50%; height: 100%;
+  pointer-events: all;
+  display: flex;
+  align-items: flex-start;   /* ← en haut */
+  justify-content: center;
+  gap: 18px;
+  padding-top: 16px;
+    }
   </style>
 </head>
 <body>
@@ -144,10 +150,7 @@
       <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
     </div>
   </div>
-  <div id="jump-zone">
-    <div id="jump-btn"
-      ontouchstart="mJump(true)" ontouchend="mJump(false)" ontouchcancel="mJump(false)">⬆</div>
-  </div>
+  <div id="jump-zone"></div>
   </div>
 
   <div id="game-wrapper"></div>
@@ -241,8 +244,17 @@
 
 function mLeft(v)  { mobileKeys.left = v;  document.getElementById('btn-left').classList.toggle('pressed', v); }
 function mRight(v) { mobileKeys.right = v; document.getElementById('btn-right').classList.toggle('pressed', v); }
-function mJump(v)  { mobileKeys.up = v;    document.getElementById('jump-btn').classList.toggle('pressed', v); }
+function mJump(v)  { mobileKeys.up = v; }
 
+// Saut : clic/tap sur la moitié droite de l'écran
+document.addEventListener('touchstart', function(e) {
+  var touch = e.touches[0];
+  if (touch.clientX > window.innerWidth / 2) mJump(true);
+}, { passive: true });
+document.addEventListener('touchend', function(e) {
+  mJump(false);
+}, { passive: true });
+  
   function preload(){
     this.load.image('sky','assets/sky.png');
     this.load.image('ground','assets/platform.png');
