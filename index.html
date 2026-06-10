@@ -28,35 +28,35 @@
       height: 100%;
     }
 
-    /* ── CÔTÉ GAUCHE ── */
-    .left-panel {
-      width: 60%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      padding: 12px;
-      gap: 10px;
-    }
+.left-panel {
+  width: 60%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  position: relative; /* ← ajout */
+}
 
-    .top-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-shrink: 0;
-    }
+.top-bar {
+  position: absolute; /* ← sort du flux */
+  bottom: 12px;       /* ← collé en bas */
+  left: 12px;
+  right: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 0;         /* ← derrière le reste */
+}
 
-    .top-bar img {
-      width: 90px;
-      cursor: pointer;
-    }
-
-    .buttons {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      flex: 1;
-      justify-content: center;
-    }
+.buttons {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  justify-content: center;
+  z-index: 1;         /* ← devant la top-bar */
+  position: relative;
+}
 
     .buttons img {
       width: 100%;
