@@ -21,11 +21,12 @@
       height: 100vh;
     }
 
-    .layout {
-      display: flex;
-      width: 100%;
-      height: 100%;
-    }
+.layout {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  position: relative; /* Ajouté pour verrouiller le positionnement absolu */
+}
 
     /* ───────── GAUCHE ───────── */
 
@@ -38,11 +39,17 @@
 
     /* BOUTON RETOUR */
     .btn-retour,
-    .btn-parametre {
-      position: absolute;
-      top: 0; /* collé au haut proprement */
-      width: 90px;
-      height: 90px;
+.btn-parametre {
+  position: fixed; /* Utilise l'écran entier comme repère */
+  top: 0;
+  right: 12px;
+  width: 90px;
+  height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
 
       display: flex;
       align-items: center;
@@ -137,20 +144,25 @@
 
 <body>
 
-  <div class="layout">
+<div class="layout">
 
-    <!-- GAUCHE -->
-    <div class="left-panel">
+  <div class="left-panel">
+    <div class="btn-retour">
+      <img src="assets/logoretour.png" onclick="window.location.href='./index.html'">
+    </div>
 
-      <div class="btn-retour">
-        <img src="assets/logoretour.png"
-             onclick="window.location.href='./index.html'">
+    <div class="buttons">
       </div>
+  </div>
 
-      <div class="btn-parametre">
-        <img src="assets/logoparametre.png"
-             onclick="window.location.href='./parametre.html'">
-      </div>
+  <div class="right-panel">
+    </div>
+
+  <div class="btn-parametre">
+    <img src="assets/logoparametre.png" onclick="window.location.href='./parametre.html'">
+  </div>
+
+</div>
 
       <div class="buttons">
         <img src="assets/logosolo.png"
