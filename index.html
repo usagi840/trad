@@ -23,16 +23,6 @@
       width: 100%;
       height: 100%;
     }
-    /* ── CÔTÉ GAUCHE ── */
-    .left-panel {
-      width: 60%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      padding: 12px;
-      gap: 10px;
-      position: relative;
-    }
     .top-bar {
       display: flex;
       position: absolute;
@@ -64,14 +54,22 @@
       transform: scale(1.03);
       filter: brightness(1.15);
     }
-    /* ── CÔTÉ DROIT ── */
-    .right-panel {
-      width: 40%;
+        /* ── CÔTÉ GAUCHE ── */
+    .left-panel {
+      width: 60%;
       height: 100%;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: flex-end;
+      padding: 12px;
+      gap: 10px;
+      position: relative;
+    }
+    /* ── CÔTÉ DROIT ── */
+    .right-panel {
+      width: 60%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
       padding: 12px 12px 0 0;
       gap: 0;
       position: relative;
